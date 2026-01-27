@@ -68,7 +68,7 @@ class ProfileRepository {
            'is_parent': false,
            'parent_id': '00000000-0000-0000-0000-000000000000',
            'balance': 0,
-           'avatar_url': 'https://api.dicebear.com/7.x/avataaars/png?seed=$username&mouth=smile,twinkle&eyes=happy,wink&eyebrows=default,raisedExcited',
+           'avatar_url': 'https://api.dicebear.com/7.x/bottts/png?seed=$username&mouth=smile01,smile02&eyes=happy,hearts,round,frame1,frame2',
            'updated_at': DateTime.now().toIso8601String(),
          };
          kidsJson.add(jsonEncode(newKid));
@@ -100,7 +100,7 @@ class ProfileRepository {
        'is_parent': false,
        'parent_id': parentId,
        'balance': 0,
-       'avatar_url': 'https://api.dicebear.com/7.x/avataaars/png?seed=$username&mouth=smile,twinkle&eyes=happy,wink&eyebrows=default,raisedExcited', // Auto happy avatar
+       'avatar_url': 'https://api.dicebear.com/7.x/bottts/png?seed=$username&mouth=smile01,smile02&eyes=happy,hearts,round,frame1,frame2', // Auto neutral happy robot
      });
   }
 

@@ -195,9 +195,9 @@ class DashboardPage extends ConsumerWidget {
             itemCount: kids.length,
             itemBuilder: (context, index) {
               final kid = kids[index];
-              // Force "Happy" Avatar for Kids (Override saved URL if needed or just generate fresh)
-              // We use DiceBear Avataaars with happy traits
-              final happyAvatarUrl = 'https://api.dicebear.com/7.x/avataaars/png?seed=${kid['username']}&mouth=smile,twinkle&eyes=happy,wink&eyebrows=default,raisedExcited';
+              // Force "Neutral Happy" Avatar for Kids
+              // We use DiceBear "bottts" (Robots) which are neutral and fun
+              final happyAvatarUrl = 'https://api.dicebear.com/7.x/bottts/png?seed=${kid['username']}&mouth=smile01,smile02&eyes=happy,hearts,round,frame1,frame2';
               
               return Material(
                 color: Colors.transparent,
