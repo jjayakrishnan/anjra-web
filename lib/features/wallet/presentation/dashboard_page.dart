@@ -189,12 +189,16 @@ class DashboardPage extends ConsumerWidget {
         }
 
         return SizedBox(
-          height: 100,
+          height: 130, // Increased height to prevent overflow
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: kids.length,
             itemBuilder: (context, index) {
               final kid = kids[index];
+              // Force "Happy" Avatar for Kids (Override saved URL if needed or just generate fresh)
+              // We use DiceBear Avataaars with happy traits
+              final happyAvatarUrl = 'https://api.dicebear.com/7.x/avataaars/png?seed=${kid['username']}&mouth=smile,twinkle&eyes=happy,wink&eyebrows=default,raisedExcited';
+              
               return Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -210,14 +214,18 @@ class DashboardPage extends ConsumerWidget {
                         CircleAvatar(
                           radius: 30,
                           backgroundColor: Colors.blue.shade100,
-                          backgroundImage: NetworkImage(kid['avatar_url'] ?? ''),
-                          child: kid['avatar_url'] == null ? const Icon(Icons.person) : null,
+                          backgroundImage: NetworkImage(happyAvatarUrl), // Force happy
+                          // child: kid['avatar_url'] == null ? const Icon(Icons.person) : null, // Removed fallback as we always construct URL
                         ),
                         const SizedBox(height: 8),
                         Text(
                           kid['full_name'] ?? 'Kid', 
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '₹${(kid['balance'] ?? 0).toString()}',
+                          style: const TextStyle(fontSize: 12, color: Colors.green),
                         ),
                       ],
                     ),

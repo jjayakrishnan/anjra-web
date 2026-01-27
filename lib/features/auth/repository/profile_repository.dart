@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -52,6 +55,28 @@ class ProfileRepository {
     required String username, 
     required String pin
   }) async {
+     // TEST MODE: Mock Creation
+     if (dotenv.env['TEST_MODE'] == 'true') {
+       final prefs = await SharedPreferences.getInstance();
+       if (prefs.getBool('is_test_parent_logged_in') == true) {
+         final kidsJson = prefs.getStringList('test_kids') ?? [];
+         final newKid = {
+           'id': const Uuid().v4(),
+           'full_name': name,
+           'username': username.toLowerCase(),
+           'pin': pin,
+           'is_parent': false,
+           'parent_id': '00000000-0000-0000-0000-000000000000',
+           'balance': 0,
+           'avatar_url': 'https://api.dicebear.com/7.x/avataaars/png?seed=$username&mouth=smile,twinkle&eyes=happy,wink&eyebrows=default,raisedExcited',
+           'updated_at': DateTime.now().toIso8601String(),
+         };
+         kidsJson.add(jsonEncode(newKid));
+         await prefs.setStringList('test_kids', kidsJson);
+         return;
+       }
+     }
+
      final parentId = _supabase.auth.currentUser!.id;
      
      // Generate a random UUID for the kid
@@ -75,7 +100,7 @@ class ProfileRepository {
        'is_parent': false,
        'parent_id': parentId,
        'balance': 0,
-       'avatar_url': 'https://api.dicebear.com/7.x/fun-emoji/png?seed=$username', // Auto avatar
+       'avatar_url': 'https://api.dicebear.com/7.x/avataaars/png?seed=$username&mouth=smile,twinkle&eyes=happy,wink&eyebrows=default,raisedExcited', // Auto happy avatar
      });
   }
 
@@ -101,6 +126,13 @@ class ProfileRepository {
 
   // Fetch all kids linked to this parent
   Future<List<Map<String, dynamic>>> getKids(String parentId) async {
+    // TEST MODE: Mock Get Kids
+    if (parentId == '00000000-0000-0000-0000-000000000000') {
+       final prefs = await SharedPreferences.getInstance();
+       final kidsJson = prefs.getStringList('test_kids') ?? [];
+       return kidsJson.map((k) => Map<String, dynamic>.from(jsonDecode(k))).toList();
+    }
+
     final response = await _supabase
         .from('profiles')
         .select()

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // Added for TEST_MODE
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -39,7 +40,26 @@ class UserNotifier extends AsyncNotifier<AppUser?> {
     // 1. Check memory override
     if (_overrideUser != null) return _overrideUser;
 
-    // 2. Check Supabase Auth (Persistence for Parents) - PRIORITIZED
+    // TEST MODE: Check Local Mock Parent
+    if (dotenv.env['TEST_MODE'] == 'true') {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getBool('is_test_parent_logged_in') == true) {
+         final name = prefs.getString('test_parent_name') ?? 'Test Parent';
+         _overrideUser = AppUser(
+           profile: {
+             'id': '00000000-0000-0000-0000-000000000000',
+             'full_name': name,
+             'is_parent': true,
+             'username': 'testparent',
+             'balance': 0, // Mock balance
+           },
+           isKid: false,
+         );
+         return _overrideUser;
+      }
+    }
+
+    // 2. Check Supabase Auth (Persistence for Parents)
     try {
       final user = Supabase.instance.client.auth.currentUser;
       if (user != null) {
@@ -120,6 +140,10 @@ class UserNotifier extends AsyncNotifier<AppUser?> {
      await Supabase.instance.client.auth.signOut();
      final prefs = await SharedPreferences.getInstance();
      await prefs.remove('app_user_session');
+     
+     // Clear Test Mode Session
+     await prefs.remove('is_test_parent_logged_in');
+     await prefs.remove('test_parent_name');
      
      _overrideUser = null;
      state = const AsyncValue.data(null);
