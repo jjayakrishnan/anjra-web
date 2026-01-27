@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
   return TransactionRepository(Supabase.instance.client);
@@ -56,6 +57,34 @@ class TransactionRepository {
   }
   
   Future<List<Map<String, dynamic>>> fetchHistory(String userId) async {
+    // Check for TEST_MODE
+    if (dotenv.env['TEST_MODE'] == 'true') {
+      // Return mock transactions
+      await Future.delayed(const Duration(milliseconds: 500)); // Simulate delay
+      return [
+        {
+          'id': 'tx-1',
+          'amount': 50.0,
+          'created_at': DateTime.now().subtract(const Duration(minutes: 30)).toIso8601String(),
+          'note': 'Weekly Allowance',
+          'sender_id': 'test-parent-id',
+          'receiver_id': userId,
+          'sender': {'full_name': 'Parent', 'username': 'parent'},
+          'receiver': {'full_name': 'Kid', 'username': 'kid'},
+        },
+        {
+          'id': 'tx-2',
+          'amount': 10.0,
+          'created_at': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+          'note': 'Ice Cream',
+          'sender_id': userId,
+          'receiver_id': 'shop-id',
+          'sender': {'full_name': 'Kid', 'username': 'kid'},
+          'receiver': {'full_name': 'Ice Cream Shop', 'username': 'shop'},
+        },
+      ];
+    }
+
     // Basic history fetch. 
     // NOTE: This will fail for Kids due to RLS if they are not auth.uid()
     // For Kids, we must use the RPC if we have the PIN? But here we don't passed PIN.
@@ -71,6 +100,24 @@ class TransactionRepository {
   }
 
   Future<List<Map<String, dynamic>>> fetchKidHistory(String userId, String pin) async {
+    // Check for TEST_MODE
+    if (dotenv.env['TEST_MODE'] == 'true') {
+      // Return mock transactions (reuse logic or vary slightly)
+      await Future.delayed(const Duration(milliseconds: 500));
+      return [
+         {
+          'id': 'tx-kid-1',
+          'amount': 25.0,
+          'created_at': DateTime.now().subtract(const Duration(hours: 2)).toIso8601String(),
+          'note': 'Chore Reward',
+          'sender_id': 'test-parent-id',
+          'receiver_id': userId,
+          'sender': {'full_name': 'Parent', 'username': 'parent'},
+          'receiver': {'full_name': 'Me', 'username': 'kid'},
+        },
+      ];
+    }
+
     final response = await _supabase.rpc('get_kid_transactions', params: {
       'kid_id': userId,
       'pin': pin,
