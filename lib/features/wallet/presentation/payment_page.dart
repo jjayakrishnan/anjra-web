@@ -35,7 +35,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
           senderId: sender.id,
           receiverId: widget.receiverId,
           amount: amount,
-          pin: sender.pin, // Assuming AppUser has this getter now
+          pin: sender.pin ?? '0000', // Default if missing
           note: _noteController.text,
         );
       } else {

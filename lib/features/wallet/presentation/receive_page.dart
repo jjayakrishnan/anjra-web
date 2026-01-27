@@ -5,17 +5,21 @@ import 'package:anjra/core/providers/user_provider.dart';
 import 'package:anjra/core/theme/app_theme.dart';
 
 class ReceivePage extends ConsumerWidget {
-  const ReceivePage({super.key});
+  final String userId;
+  const ReceivePage({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider).asData?.value;
-
-    if (user == null) return const Scaffold(body: Center(child: Text("Loading...")));
-
+    // We already have userId, but can watch user for name/username update if needed.
+    // However, if passed implicitly, we can just use the ID for QR.
+    
     // The data encoded in QR. 
     // Format: "anjra:USER_ID" to be safe and specific.
-    final qrData = "anjra:${user.id}";
+    final qrData = "anjra:$userId";
+    
+    // Attempt to get user details for display, but safe to fail
+    final user = ref.watch(userProvider).asData?.value;
+    final displayName = user?.fullName ?? "User"; // Fallback name
 
     return Scaffold(
       backgroundColor: AppTheme.primaryColor,
@@ -59,7 +63,7 @@ class ReceivePage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    user.username.isNotEmpty ? '@${user.username}' : user.name,
+                    displayName,
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
