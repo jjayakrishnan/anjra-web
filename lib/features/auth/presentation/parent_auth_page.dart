@@ -5,7 +5,10 @@ import 'package:anjra/core/theme/app_theme.dart';
 import 'package:anjra/features/auth/repository/auth_repository.dart';
 import 'package:anjra/features/admin/presentation/admin_dashboard_page.dart';
 // Note: You might need to adjust the import if UserProvider is used for state
-// import 'package:anjra/core/providers/user_provider.dart'; 
+import 'package:anjra/features/admin/presentation/admin_dashboard_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:anjra/core/providers/user_provider.dart';
+import 'package:anjra/core/models/user_profile.dart';
 
 class ParentAuthPage extends ConsumerStatefulWidget {
   const ParentAuthPage({super.key});
@@ -41,12 +44,7 @@ class _ParentAuthPageState extends ConsumerState<ParentAuthPage> {
         await repo.signInParent(email: email, password: password);
         if (mounted) {
            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Welcome back!')));
-           // Navigate to Admin Dashboard directly for this task request
-           // OR standard dashboard. For now, I'll push to Admin Dashboard if it's the "admin" user requested.
-           
-           // For now, let's just stay here or go to main dashboard?
-           // The user specifically asked for High Level User.
-           // I will add a button below to go to Admin Dashboard manually.
+           Navigator.of(context).pushReplacementNamed('/dashboard');
         }
       }
     } catch (e) {
@@ -100,6 +98,29 @@ class _ParentAuthPageState extends ConsumerState<ParentAuthPage> {
               child: Text(_isSignUp ? 'Already have an account? Login' : 'New here? Create Account'),
             ),
             const Divider(),
+            if (dotenv.env['TEST_MODE'] == 'true')
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                       final mockUser = UserProfile(
+                         id: 'mock_parent_id',
+                         email: 'test@parent.com',
+                         fullName: 'Test Parent',
+                         isParent: true,
+                         balance: 1000.0,
+                       );
+                       ref.read(userProvider.notifier).setMockUser(mockUser);
+                       Navigator.of(context).pushReplacementNamed('/dashboard');
+                    },
+                    icon: const Icon(Icons.bug_report),
+                    label: const Text("TEST LOGIN (MOCK)"),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                  ),
+                ),
+              ),
             // Backdoor / Admin Access
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(

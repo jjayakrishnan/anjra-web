@@ -34,16 +34,14 @@ class _KidAuthPageState extends ConsumerState<KidAuthPage> {
       
       if (kidProfile != null) {
         // Success! Set global user state
-        // Commented out to fix "Session Expired" issue. 
-        // Force sign out breaks the flow if Kid login is virtual-only and we rely on memory.
-        // await Supabase.instance.client.auth.signOut();
+        // Ensure we clear any previous session so UserProvider doesn't try to load it
+        await Supabase.instance.client.auth.signOut();
         
-        ref.read(userProvider.notifier).setKidUser(kidProfile);
+        // Force state update
+        await ref.read(userProvider.notifier).setKidUser(kidProfile);
         
         if (mounted) {
-           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const DashboardPage()),
-          );
+           Navigator.of(context).pushReplacementNamed('/dashboard');
         }
       } else {
          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Wrong username or PIN')));

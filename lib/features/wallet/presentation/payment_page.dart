@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anjra/core/theme/app_theme.dart';
 import 'package:anjra/features/wallet/repository/transaction_repository.dart';
+import 'package:anjra/features/auth/repository/profile_repository.dart'; // import profile repo
 import 'package:anjra/core/providers/user_provider.dart';
 
 class PaymentPage extends ConsumerStatefulWidget {
@@ -80,8 +81,26 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
               ),
               child: Column(
                 children: [
-                  Text('Paying User ID:', style: TextStyle(color: Colors.grey[600])),
-                  Text(widget.receiverId, style: const TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                  Text('Paying User:', style: TextStyle(color: Colors.grey[600])),
+                  FutureBuilder(
+                    future: ref.read(profileRepositoryProvider).getProfile(widget.receiverId),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2));
+                      }
+                      final name = snapshot.data?.fullName ?? snapshot.data?.id ?? widget.receiverId;
+                      // Mask ID if falling back, or show name.
+                      // If name is null, we might want to mask ID partially? 
+                      // For now, let's just show what we have.
+                      return Text(
+                        name, 
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18), 
+                        overflow: TextOverflow.ellipsis
+                      );
+                    },
+                  ),
+                  if (true) // Keeping ID small below if needed, or remove. Let's show ID small.
+                     Text(widget.receiverId, style: const TextStyle(fontSize: 10, color: Colors.grey)),
                 ],
               ),
             ),

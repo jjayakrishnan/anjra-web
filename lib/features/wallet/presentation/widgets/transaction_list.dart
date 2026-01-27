@@ -1,91 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:anjra/features/wallet/repository/transaction_repository.dart';
-import 'package:anjra/core/providers/user_provider.dart';
-
-final transactionHistoryProvider = FutureProvider.autoDispose.family<List<Map<String, dynamic>>, String?>((ref, userId) async {
-  final user = ref.watch(userProvider).asData?.value;
-  final targetId = userId ?? user?.id;
-  
-  if (targetId == null) return [];
-  
-  // If we are looking at MY history and I am a kid
-  if (userId == null && user?.isKid == true) {
-     return ref.read(transactionRepositoryProvider).fetchKidHistory(targetId, user!.pin);
-  }
-  
-  return ref.read(transactionRepositoryProvider).fetchHistory(targetId);
-});
+import '../../../../core/models/transaction.dart';
+import 'package:intl/intl.dart';
 
 class TransactionList extends ConsumerWidget {
-  final String? userId; // If null, uses current user
-  
-  const TransactionList({super.key, this.userId});
+  final String userId;
+  const TransactionList({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final historyAsync = ref.watch(transactionHistoryProvider(userId));
-
-    return historyAsync.when(
-      loading: () => const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator())),
-      error: (e, s) => Text('Error: $e'),
-      data: (transactions) {
-        if (transactions.isEmpty) {
-          return Center(
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  child: Icon(Icons.history_rounded, size: 40, color: Colors.grey.shade300),
-                ),
-                const SizedBox(height: 12),
-                Text('No transactions yet!', style: GoogleFonts.outfit(color: Colors.grey)),
-              ],
-            ),
-          );
+    return FutureBuilder<List<dynamic>>(
+      future: ref.read(transactionRepositoryProvider).fetchTransactions(userId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text("Error: ${snapshot.error}"));
+        }
+        
+        final transactionsRaw = snapshot.data ?? [];
+        if (transactionsRaw.isEmpty) {
+          return const Center(child: Text("No transactions yet."));
         }
 
-        return ListView.separated(
+        // Ideally parse to Transaction model safely
+        final transactions = transactionsRaw.map((e) {
+             try {
+               return Transaction.fromJson(e);
+             } catch (_) {
+               return null;
+             }
+        }).whereType<Transaction>().toList();
+
+        return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: transactions.length,
-          separatorBuilder: (_, __) => const Divider(),
           itemBuilder: (context, index) {
             final tx = transactions[index];
-            
-            // Determine "Who am I" in this context
-            final contextUserId = userId ?? ref.read(userProvider).asData?.value?.id;
-            
-            final isSender = tx['sender_id'] == contextUserId;
-            final otherParty = isSender ? tx['receiver'] : tx['sender'];
-            // Handle nulls if expansion failed or user deleted (use 'Unknown')
-            final otherName = otherParty != null ? (otherParty['username'] ?? otherParty['full_name']) : 'Unknown';
-            
-            return ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: CircleAvatar(
-                backgroundColor: isSender ? Colors.deepOrange.shade50 : Colors.green.shade50,
-                child: Icon(
-                  isSender ? Icons.arrow_outward_rounded : Icons.south_west_rounded,
-                  color: isSender ? Colors.deepOrange : Colors.green,
+            final isCredit = tx.receiverId == userId;
+            final hasNote = tx.note != null && tx.note!.isNotEmpty;
+            final displayTitle = hasNote ? tx.note! : (isCredit ? "Received from ${tx.senderId}" : "Sent to ${tx.receiverId}");
+            final displaySubtitle = hasNote 
+                ? "${isCredit ? 'From: ' + tx.senderId : 'To: ' + tx.receiverId} • ${DateFormat.yMMMd().format(tx.createdAt)}"
+                : DateFormat.yMMMd().format(tx.createdAt);
+
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              elevation: 0,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade100)),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: isCredit ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                  child: Icon(
+                    isCredit ? Icons.arrow_downward : Icons.arrow_upward,
+                    color: isCredit ? Colors.green : Colors.red,
+                  ),
                 ),
-              ),
-              title: Text(
-                isSender ? 'To $otherName' : 'From $otherName',
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                tx['note'] ?? 'No note',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-              ),
-              trailing: Text(
-                '${isSender ? "-" : "+"} ₹${tx['amount']}',
-                style: GoogleFonts.outfit(
-                  fontWeight: FontWeight.bold,
-                  color: isSender ? Colors.red : Colors.green,
-                  fontSize: 16,
+                title: Text(
+                  displayTitle,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(displaySubtitle),
+                trailing: Text(
+                  "${isCredit ? '+' : '-'} \$${tx.amount.toStringAsFixed(2)}",
+                  style: TextStyle(
+                    color: isCredit ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             );

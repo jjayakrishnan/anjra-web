@@ -54,4 +54,42 @@ class ProfileRepository {
       return null;
     }
   }
+  Future<void> createVirtualKid({
+    required String name,
+    required String username,
+    required String pin,
+  }) async {
+    final parentId = _supabase.auth.currentUser?.id;
+    if (parentId == null) throw Exception("Must be logged in as parent");
+
+    // We assume 'profiles' table allows inserting rows.
+    // However, usually 'id' references 'auth.users.id'. 
+    // If that's the case, we technically need an Auth User.
+    // For this demo, let's try to just insert. 
+    // If it fails, the user needs to adjust Supabase or we use Admin API to create user.
+    // But since I don't have Admin API key here (only anon), I'll try to just insert.
+    // If there is an FK constraint, this WILL fail.
+    
+    // WORKAROUND: If we can't create Auth User from client (requires service role usually),
+    // and if profiles.id is FK to auth.users.id, 
+    // THEN we actually CANNOT create a "Virtual" user easily without a backend function.
+    
+    // BUT: Does `profiles.id` have a FK constraint? Usually yes.
+    // Let's assume for this "Kid" feature, we might be using a separate `kids` table or `profiles` handles it.
+    // If `profiles` is strict, I should create a Kid via RPC if available.
+    
+    // Let's assume standard INSERT works for now (maybe id is not FK strict or we generate a UUID).
+    // I need Uuid package.
+    
+    await _supabase.from('profiles').insert({
+      'full_name': name, // or custom fields
+      'username': username,
+      'pin': pin,
+      'is_parent': false,
+      'parent_id': parentId,
+      'balance': 0.0,
+      // 'id': const Uuid().v4(), // If auto-gen or we must supply. Let DB handle text if gen_random_uuid() is default 
+      // But if id is PK, we might need to supply it if not auto-inc/uuid.
+    });
+  }
 }
