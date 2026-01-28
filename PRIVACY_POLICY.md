@@ -35,4 +35,4 @@ If you have any questions about this Privacy Policy, please contact us at:
 *   **Website**: https://github.com/jjayakrishnan/anjra
 
 ---
-*This privacy policy is available online at: https://github.com/jjayakrishnan/anjra/blob/main/PRIVACY_POLICY.md*
+*This privacy policy is available online at: https://jjayakrishnan.github.io/anjra-website/privacy.html*
