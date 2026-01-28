@@ -18,6 +18,9 @@ flutter precache --ios
 
 # Install dependencies
 echo "Installing Flutter dependencies..."
+# Create a dummy .env file to satisfy build requirements (secrets should be injected via environment variables if needed)
+echo "SUPABASE_URL=https://placeholder.supabase.co" > .env
+echo "SUPABASE_ANON_KEY=placeholder" >> .env
 flutter pub get
 
 # Install CocoaPods
