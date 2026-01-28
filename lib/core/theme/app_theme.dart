@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Kid-friendly Palette
-  static const Color primaryColor = Color(0xFF6C63FF); // Playful Purple
-  static const Color secondaryColor = Color(0xFF00BFA6); // Mint Green
-  static const Color accentColor = Color(0xFFFF6584); // Candy Pink
+  // Kid-friendly Palette (Updated to match Logo)
+  static const Color primaryColor = Color(0xFF00BFA6); // Vibrant Teal (Logo Body)
+  static const Color secondaryColor = Color(0xFF6C63FF); // Playful Purple (Logo Accents)
+  static const Color accentColor = Color(0xFFFFB74D); // Coin Gold/Orange
   static const Color backgroundColor = Color(0xFFF0F4F8); // Soft Cloud White
   static const Color surfaceColor = Colors.white;
   static const Color textColor = Color(0xFF2D3436);

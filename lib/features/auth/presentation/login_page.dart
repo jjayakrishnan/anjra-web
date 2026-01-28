@@ -26,10 +26,9 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo or Title
-                Icon(
-                  Icons.savings_rounded,
-                  size: 80,
-                  color: AppTheme.primaryColor,
+                Image.asset(
+                  'assets/store/app_logo.png',
+                  height: 120,
                 ),
                 const SizedBox(height: 16),
                 Text(
