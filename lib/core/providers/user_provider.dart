@@ -27,6 +27,17 @@ class UserNotifier extends AsyncNotifier<UserProfile?> {
   }
 
   Future<UserProfile?> _fetchProfile(String userId) async {
+    // Handle Apple Demo User
+    if (userId == 'demo-kid-id-123') {
+      return UserProfile(
+        id: 'demo-kid-id-123',
+        fullName: 'Demo Kid',
+        isParent: false,
+        balance: 50.0,
+        pin: '1234',
+      );
+    }
+
     try {
       final data = await Supabase.instance.client
           .from('profiles')

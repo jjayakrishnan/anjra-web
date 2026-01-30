@@ -51,7 +51,7 @@ class TransactionRepository {
   }
 
   Future<List<dynamic>> fetchTransactions(String userId) async {
-    if (dotenv.env['TEST_MODE'] == 'true') {
+    if (dotenv.env['TEST_MODE'] == 'true' || userId == 'demo-kid-id-123') {
       // Simulate network delay
       await Future.delayed(const Duration(milliseconds: 500));
       return [

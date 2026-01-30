@@ -15,6 +15,17 @@ class ProfileRepository {
   // Assumes we store 'username' and 'pin' in profiles or a separate table.
   // For MVP/Demo as per previous tasks, we might be querying profiles directly.
   Future<UserProfile?> loginKid({required String username, required String pin}) async {
+    // Apple Review Demo Account Backdoor
+    if (username.toLowerCase() == 'apple_demo' && pin == '1234') {
+      return UserProfile(
+        id: 'demo-kid-id-123',
+        fullName: 'Demo Kid',
+        isParent: false,
+        balance: 50.0,
+        pin: '1234',
+      );
+    }
+
     // Note: Storing PIN in plain text is bad practice, but for this "Kid" demo feature 
     // where they might just be rows in a table, we check against the row.
     // Ideally use proper Auth or hashed PINs.
