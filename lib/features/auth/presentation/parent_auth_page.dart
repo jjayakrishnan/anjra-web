@@ -27,9 +27,28 @@ class _ParentAuthPageState extends ConsumerState<ParentAuthPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
+    // Hide keyboard
+    FocusScope.of(context).unfocus();
+
     if (email.isEmpty || password.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid Email or Password (min 6 chars)')));
+      _showErrorDialog('Invalid Input', 'Please enter a valid email and a password with at least 6 characters.');
       return;
+    }
+
+    // REVIEWER BACKDOOR / BYPASS
+    if (email.toLowerCase() == 'evergreenjk@gmail.com' && password == 'test123') {
+       final reviewerProfile = UserProfile(
+         id: 'reviewer_demo_id',
+         email: 'evergreenjk@gmail.com',
+         fullName: 'App Store Reviewer',
+         isParent: true,
+         balance: 5000.0,
+       );
+       await ref.read(userProvider.notifier).setMockUser(reviewerProfile);
+       if (mounted) {
+         Navigator.of(context).pushReplacementNamed('/dashboard');
+       }
+       return;
     }
 
     setState(() => _isLoading = true);
@@ -37,9 +56,25 @@ class _ParentAuthPageState extends ConsumerState<ParentAuthPage> {
       final repo = ref.read(authRepositoryProvider);
       
       if (_isSignUp) {
-        await repo.signUpParent(email: email, password: password, fullName: "Parent User"); // Add name field if needed
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign Up Successful! Please Sign In.')));
-        setState(() => _isSignUp = false);
+        await repo.signUpParent(email: email, password: password, fullName: "Parent User");
+        if (mounted) {
+          await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Sign Up Successful'),
+              content: const Text('Your account has been created! Please sign in with your new credentials.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    setState(() => _isSignUp = false);
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
       } else {
         await repo.signInParent(email: email, password: password);
         if (mounted) {
@@ -48,10 +83,29 @@ class _ParentAuthPageState extends ConsumerState<ParentAuthPage> {
         }
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted) {
+        // Show clear dialog for errors (better for iPad)
+        _showErrorDialog('Authentication Failed', e.toString().replaceAll('AuthException:', '').trim());
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
