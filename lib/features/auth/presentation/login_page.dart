@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anjra/core/theme/app_theme.dart';
 import 'package:anjra/features/auth/presentation/parent_auth_page.dart';
 import 'package:anjra/features/auth/presentation/kid_auth_page.dart';
+import 'package:anjra/core/providers/user_provider.dart';
+import 'package:anjra/core/models/user_profile.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   bool isKidMode = true; // Default to kid mode as it's the main user base
 
   @override
@@ -78,6 +81,36 @@ class _LoginPageState extends State<LoginPage> {
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   child: isKidMode ? const KidAuthPage() : const ParentAuthPage(),
+                ),
+                const SizedBox(height: 24),
+                
+                // App Store Demonstration Mode
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final reviewerProfile = UserProfile(
+                        id: 'demo_user_id',
+                        email: 'demo@anjra.app',
+                        fullName: 'App Demonstrator',
+                        isParent: true,
+                        balance: 5000.0,
+                      );
+                      await ref.read(userProvider.notifier).setMockUser(reviewerProfile);
+                      if (context.mounted) {
+                        Navigator.of(context).pushReplacementNamed('/dashboard');
+                      }
+                    },
+                    icon: const Icon(Icons.explore),
+                    label: const Text('App Store Demo / Review Mode'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
               ],
             ),

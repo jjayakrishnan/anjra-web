@@ -85,7 +85,7 @@ class _ParentAuthPageState extends ConsumerState<ParentAuthPage> {
     } catch (e) {
       if (mounted) {
         // Show clear dialog for errors (better for iPad)
-        _showErrorDialog('Authentication Failed', e.toString().replaceAll('AuthException:', '').trim());
+        _showErrorDialog('Authentication Failed', e.toString());
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -150,44 +150,6 @@ class _ParentAuthPageState extends ConsumerState<ParentAuthPage> {
             TextButton(
               onPressed: () => setState(() => _isSignUp = !_isSignUp),
               child: Text(_isSignUp ? 'Already have an account? Login' : 'New here? Create Account'),
-            ),
-            const Divider(),
-            if (dotenv.env['TEST_MODE'] == 'true')
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                       final mockUser = UserProfile(
-                         id: 'mock_parent_id',
-                         email: 'test@parent.com',
-                         fullName: 'Test Parent',
-                         isParent: true,
-                         balance: 1000.0,
-                       );
-                       ref.read(userProvider.notifier).setMockUser(mockUser);
-                       Navigator.of(context).pushReplacementNamed('/dashboard');
-                    },
-                    icon: const Icon(Icons.bug_report),
-                    label: const Text("TEST LOGIN (MOCK)"),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                  ),
-                ),
-              ),
-            // Backdoor / Admin Access
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AdminDashboardPage()),
-                );
-              },
-              icon: const Icon(Icons.admin_panel_settings),
-              label: const Text("ADMIN DASHBOARD (DEBUG)"),
             ),
           ],
         ),
