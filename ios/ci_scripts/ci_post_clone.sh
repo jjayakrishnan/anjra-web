@@ -26,4 +26,5 @@ flutter pub get
 # Install CocoaPods
 echo "Installing CocoaPods..."
 cd ios
-pod install
+# Retry logic for pod install to bypass transient Xcode Cloud network issues
+pod install || pod install --repo-update || (sleep 10 && pod install --repo-update)
