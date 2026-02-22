@@ -1,62 +1,70 @@
 import { test, expect } from '@playwright/test';
 
-// Use this config if the flutter app doesn't immediately attach accessibility labels to the DOM
 test.use({ actionTimeout: 10000, navigationTimeout: 15000 });
 
 test.describe('Anjra App Authentication & Dashboard Flows', () => {
 
-  test('Parent Login and Send Money (via Autocomplete)', async ({ page }) => {
+  test('Parent Login and Send Money (via Autocomplete) Web Test', async ({ page }) => {
     // 1. Navigate to local Flutter Web server
     await page.goto('http://localhost:8080');
-
-    // NOTE: Flutter Web generates a shadow root or layered canvas. 
-    // To interact with Flutter Web reliably without the --web-renderer html flag (which is deprecated),
-    // you must rely on Flutter's semantic DOM. Ensure your flutter app is built with semantics enabled if this fails.
-
-    // 2. Perform Login
-    // Find the email input field. This might be tricky in standard flutter web.
-    // Try waiting for the specific semantic node.
-    const emailInput = page.locator('input[type="text"]').first();
-    const passInput = page.locator('input[type="password"]').first();
-
-    // In our app, there might not be explicit input types. We'll wait for the canvas to load.
     await page.waitForLoadState('load');
 
-    // This is an example workflow for a true semantic web build:
-    /*
-    await page.getByLabel('Email').fill('test@parent.com');
-    await page.getByLabel('Password').fill('password123');
-    await page.getByRole('button', { name: 'Login' }).click();
+    // Wait for Flutter glass pane to appear
+    await page.waitForSelector('flt-glass-pane', { state: 'attached', timeout: 10000 });
+    // Add wait to ensure Flutter has fully booted
+    await page.waitForTimeout(5000);
 
-    // 3. Wait for Dashboard to Load
-    await expect(page.getByText('Anjra Wallet')).toBeVisible();
+    // 2. Perform Login via keyboard navigation (Flutter Web support)
+    // Email field
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('evergreenjk@gmail.com', { delay: 100 });
 
-    // 4. Test the Send Money flow
-    await page.getByRole('button', { name: 'Send' }).click();
-    
-    // 5. Click the "Send to Username" bottom sheet option
-    await page.getByText('Send to Username').click();
+    // Password field
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('test123', { delay: 100 });
 
-    // 6. Test Autocomplete functionality
-    const usernameField = page.getByLabel('Family Member Username');
-    await usernameField.fill('ji'); // Type partial name
+    // Login button
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Enter');
 
-    // Verify autocomplete dropdown suggests "Jiya"
-    await expect(page.getByText('Jiya')).toBeVisible();
-    await page.getByText('Jiya').click(); // Select Jiya
+    console.log("Submitted login. Waiting for dashboard...");
+    await page.waitForTimeout(5000);
 
-    // 7. Fill out amount and send
-    await page.getByLabel('Amount ($)').fill('10.00');
-    await page.getByRole('button', { name: 'Send Money' }).click();
+    // Now we should be on the dashboard page.
+    await page.screenshot({ path: 'test-results/dashboard-web.png' });
 
-    // 8. Verify Success Dialog
-    await expect(page.getByText('Successfully sent $10.00 to Jiya!')).toBeVisible();
-    */
+    // Assuming Tab order: 'Admin Panel', 'Add Kid', 'Send', 'Receive'
+    // This part is very dependent on the exact layout, but let's press tab to find 'Send'
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab'); // This might be Send
+    await page.keyboard.press('Enter');
 
-    // NOTE TO USER: Since building Flutter to pure HTML is no longer officially supported as of recent Flutter sdks
-    // (the `--web-renderer html` flag was removed), Playwright cannot cleanly find standard DOM elements.
-    // This spec file represents the exact logic you would run if the semantics tree was perfectly exposed.
-    console.log("Playwright test initialized. Awaiting semantic tree exposure from Flutter.");
+    await page.waitForTimeout(2000);
+    await page.screenshot({ path: 'test-results/send-money-web.png' });
+
+    // Try to type in the username field
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('testkid', { delay: 100 });
+
+    await page.waitForTimeout(2000);
+    await page.screenshot({ path: 'test-results/send-money-search.png' });
+
+    // Press down to select the first autocomplete suggestion
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+
+    // Tab to amount
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('50', { delay: 100 });
+
+    // Send button
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Enter');
+
+    await page.waitForTimeout(3000);
+    await page.screenshot({ path: 'test-results/send-money-success.png' });
   });
 
 });
+

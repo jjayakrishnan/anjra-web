@@ -90,12 +90,19 @@ class _SendMoneyPageState extends ConsumerState<SendMoneyPage> {
       return;
     }
 
-    // Try to find a family member whose name OR id matches exactly (case-insensitive)
-    final matchedUser = _familyMembers.where((p) {
-      final textLower = usernameText.toLowerCase();
-      final nameLower = p.fullName?.toLowerCase() ?? '';
-      return nameLower == textLower || p.id.toLowerCase() == textLower;
-    }).firstOrNull;
+    // Try to find a family member whose name OR id matches exactly or partially (case-insensitive)
+    UserProfile? matchedUser = _selectedUser;
+
+    if (matchedUser == null || (matchedUser.fullName ?? matchedUser.id).toLowerCase() != usernameText.toLowerCase()) {
+      matchedUser = _familyMembers.where((p) {
+        final textLower = usernameText.toLowerCase();
+        final nameLower = p.fullName?.toLowerCase() ?? '';
+        return nameLower == textLower || 
+               p.id.toLowerCase() == textLower ||
+               nameLower.contains(textLower) ||
+               textLower.contains(nameLower);
+      }).firstOrNull;
+    }
 
     if (matchedUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Could not find a family member named '$usernameText'.")));
@@ -169,6 +176,9 @@ class _SendMoneyPageState extends ConsumerState<SendMoneyPage> {
                   return (option.fullName?.toLowerCase().contains(lower) ?? false) ||
                          (option.id.toLowerCase().contains(lower));
                 });
+              },
+              onSelected: (UserProfile selection) {
+                _selectedUser = selection;
               },
               fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
                 _autoCompleteController = controller;
