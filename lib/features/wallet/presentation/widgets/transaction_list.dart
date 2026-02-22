@@ -44,9 +44,12 @@ class TransactionList extends ConsumerWidget {
             final tx = transactions[index];
             final isCredit = tx.receiverId == userId;
             final hasNote = tx.note != null && tx.note!.isNotEmpty;
-            final displayTitle = hasNote ? tx.note! : (isCredit ? "Received from ${tx.senderId}" : "Sent to ${tx.receiverId}");
+            
+            final remoteName = isCredit ? (tx.senderName ?? tx.senderId) : (tx.receiverName ?? tx.receiverId);
+            
+            final displayTitle = hasNote ? tx.note! : (isCredit ? "Received from $remoteName" : "Sent to $remoteName");
             final displaySubtitle = hasNote 
-                ? "${isCredit ? 'From: ' + tx.senderId : 'To: ' + tx.receiverId} • ${DateFormat.yMMMd().format(tx.createdAt)}"
+                ? "${isCredit ? 'From: ' + remoteName : 'To: ' + remoteName} • ${DateFormat.yMMMd().format(tx.createdAt)}"
                 : DateFormat.yMMMd().format(tx.createdAt);
 
             return Card(

@@ -77,40 +77,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
                 const SizedBox(height: 32),
 
-                // Content Area card
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   child: isKidMode ? const KidAuthPage() : const ParentAuthPage(),
-                ),
-                const SizedBox(height: 24),
-                
-                // App Store Demonstration Mode
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      final reviewerProfile = UserProfile(
-                        id: 'demo_user_id',
-                        email: 'demo@anjra.app',
-                        fullName: 'App Demonstrator',
-                        isParent: true,
-                        balance: 5000.0,
-                      );
-                      await ref.read(userProvider.notifier).setMockUser(reviewerProfile);
-                      if (context.mounted) {
-                        Navigator.of(context).pushReplacementNamed('/dashboard');
-                      }
-                    },
-                    icon: const Icon(Icons.explore),
-                    label: const Text('App Store Demo / Review Mode'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
                 ),
               ],
             ),

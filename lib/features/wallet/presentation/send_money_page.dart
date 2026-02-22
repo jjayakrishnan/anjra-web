@@ -34,39 +34,30 @@ class _SendMoneyPageState extends ConsumerState<SendMoneyPage> {
       final currentUser = ref.read(userProvider).value;
       if (currentUser == null) return;
 
+      List<UserProfile> allProfiles = [];
+      
       final List<dynamic> response;
       if (currentUser.isParent) {
-        if (currentUser.id == '00000000-0000-0000-0000-000000000000') {
-           // Demo reviewer account: fetch some kids to allow testing the Send flow
-           response = await Supabase.instance.client
-               .from('profiles')
-               .select()
-               .eq('is_parent', false)
-               .limit(10);
-        } else {
-           // Fetch all kids belonging to this parent
-           response = await Supabase.instance.client
-               .from('profiles')
-               .select()
-               .eq('parent_id', currentUser.id);
-        }
-      } else {
-        // Find parent and siblings
-        // If kid, we need to know their parent id, assuming it's parent_id
-        final kidData = await Supabase.instance.client
-            .from('profiles')
-            .select('parent_id')
-            .eq('id', currentUser.id)
-            .single();
-        final parentId = kidData['parent_id'];
-        
+        // Fetch all kids belonging to this parent
         response = await Supabase.instance.client
             .from('profiles')
             .select()
-            .or('id.eq.$parentId,parent_id.eq.$parentId');
-      }
-
-      final allProfiles = response.map((data) => UserProfile.fromJson(data)).toList();
+            .eq('parent_id', currentUser.id);
+      } else {
+          // Find parent and siblings (removed kid-logic from here for brevity)
+          final kidData = await Supabase.instance.client
+              .from('profiles')
+              .select('parent_id')
+              .eq('id', currentUser.id)
+              .single();
+          final parentId = kidData['parent_id'];
+          
+          response = await Supabase.instance.client
+              .from('profiles')
+              .select()
+              .or('id.eq.$parentId,parent_id.eq.$parentId');
+        }
+        allProfiles = response.map((data) => UserProfile.fromJson(data)).toList();
       
       if (mounted) {
         setState(() {

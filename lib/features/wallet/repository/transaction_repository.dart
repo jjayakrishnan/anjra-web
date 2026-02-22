@@ -18,12 +18,6 @@ class TransactionRepository {
     required double amount,
     String? note,
   }) async {
-    // Intercept Demo/Reviewer Account transfers to prevent Postgres foreign key crashes
-    if (senderId == '00000000-0000-0000-0000-000000000000') {
-      await Future.delayed(const Duration(seconds: 1)); // Simulate network request
-      return; // Return success without writing to database
-    }
-
     // Call a Postgres Function (RPC) for atomic transfer
     // OR do client-side if RPC isn't available (not recommended but feasible for prototype)
     
@@ -90,11 +84,15 @@ class TransactionRepository {
       // Fetch where sender OR receiver is userId
       // Supabase 'or' syntax: .or('sender_id.eq.$userId,receiver_id.eq.$userId')
       final response = await _supabase
-          .from('transactions')
-          .select()
-          .or('sender_id.eq.$userId,receiver_id.eq.$userId')
-          .order('created_at', ascending: false)
-          .limit(10);
+        .from('transactions')
+        .select('''
+          *,
+          sender:profiles!sender_id(full_name),
+          receiver:profiles!receiver_id(full_name)
+        ''')
+        .or('sender_id.eq.$userId,receiver_id.eq.$userId')
+        .order('created_at', ascending: false)
+        .limit(10);
       
       return response as List<dynamic>; 
       // Note: Returning List<dynamic> or List<Map> to be parsed by provider/UI, 

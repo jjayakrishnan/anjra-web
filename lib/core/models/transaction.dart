@@ -14,9 +14,9 @@ class Transaction {
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
 
-  // Ideally, these would be expanded/joined, but for simple list, we might fetch basics or join manually
-  // Or Supabase returns nested like `sender: profiles(...)`.
-  // For now, simple model.
+  // Joined from profiles table
+  final String? senderName;
+  final String? receiverName;
 
   Transaction({
     required this.id,
@@ -25,8 +25,20 @@ class Transaction {
     required this.amount,
     this.note,
     required this.createdAt,
+    this.senderName,
+    this.receiverName,
   });
 
-  factory Transaction.fromJson(Map<String, dynamic> json) => _$TransactionFromJson(json);
-  Map<String, dynamic> toJson() => _$TransactionToJson(this);
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    return Transaction(
+      id: json['id'] as String,
+      senderId: json['sender_id'] as String,
+      receiverId: json['receiver_id'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      note: json['note'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      senderName: json['sender']?['full_name'] as String?,
+      receiverName: json['receiver']?['full_name'] as String?,
+    );
+  }
 }

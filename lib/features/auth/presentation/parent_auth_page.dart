@@ -35,22 +35,6 @@ class _ParentAuthPageState extends ConsumerState<ParentAuthPage> {
       return;
     }
 
-    // REVIEWER BACKDOOR / BYPASS
-    if (email.toLowerCase() == 'evergreenjk@gmail.com' && password == 'test123') {
-       final reviewerProfile = UserProfile(
-         id: '00000000-0000-0000-0000-000000000000',
-         email: 'evergreenjk@gmail.com',
-         fullName: 'App Store Reviewer',
-         isParent: true,
-         balance: 5000.0,
-       );
-       await ref.read(userProvider.notifier).setMockUser(reviewerProfile);
-       if (mounted) {
-         Navigator.of(context).pushReplacementNamed('/dashboard');
-       }
-       return;
-    }
-
     setState(() => _isLoading = true);
     try {
       final repo = ref.read(authRepositoryProvider);
