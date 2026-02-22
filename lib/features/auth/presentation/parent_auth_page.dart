@@ -38,7 +38,7 @@ class _ParentAuthPageState extends ConsumerState<ParentAuthPage> {
     // REVIEWER BACKDOOR / BYPASS
     if (email.toLowerCase() == 'evergreenjk@gmail.com' && password == 'test123') {
        final reviewerProfile = UserProfile(
-         id: 'reviewer_demo_id',
+         id: '00000000-0000-0000-0000-000000000000',
          email: 'evergreenjk@gmail.com',
          fullName: 'App Store Reviewer',
          isParent: true,
