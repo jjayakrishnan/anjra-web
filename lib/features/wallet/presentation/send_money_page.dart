@@ -36,11 +36,20 @@ class _SendMoneyPageState extends ConsumerState<SendMoneyPage> {
 
       final List<dynamic> response;
       if (currentUser.isParent) {
-        // Fetch all kids belonging to this parent
-        response = await Supabase.instance.client
-            .from('profiles')
-            .select()
-            .eq('parent_id', currentUser.id);
+        if (currentUser.id == '00000000-0000-0000-0000-000000000000') {
+           // Demo reviewer account: fetch some kids to allow testing the Send flow
+           response = await Supabase.instance.client
+               .from('profiles')
+               .select()
+               .eq('is_parent', false)
+               .limit(10);
+        } else {
+           // Fetch all kids belonging to this parent
+           response = await Supabase.instance.client
+               .from('profiles')
+               .select()
+               .eq('parent_id', currentUser.id);
+        }
       } else {
         // Find parent and siblings
         // If kid, we need to know their parent id, assuming it's parent_id
