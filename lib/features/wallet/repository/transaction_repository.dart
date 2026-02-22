@@ -81,18 +81,12 @@ class TransactionRepository {
         },
       ];
     }
-      // Fetch where sender OR receiver is userId
-      // Supabase 'or' syntax: .or('sender_id.eq.$userId,receiver_id.eq.$userId')
-      final response = await _supabase
-        .from('transactions')
-        .select('''
-          *,
-          sender:profiles!sender_id(full_name),
-          receiver:profiles!receiver_id(full_name)
-        ''')
-        .or('sender_id.eq.$userId,receiver_id.eq.$userId')
-        .order('created_at', ascending: false)
-        .limit(10);
+      // For kids, they are unauthenticated (anon) after login, so RLS blocks them from reading transactions.
+      // We use a custom Postgres RPC `get_user_transactions` which runs as SECURITY DEFINER to bypass RLS.
+      final response = await _supabase.rpc(
+        'get_user_transactions',
+        params: {'user_uid': userId},
+      );
       
       return response as List<dynamic>; 
       // Note: Returning List<dynamic> or List<Map> to be parsed by provider/UI, 
