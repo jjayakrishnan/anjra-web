@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 import '../../../core/models/user_profile.dart';
 
 final adminRepositoryProvider = Provider<AdminRepository>((ref) {
@@ -65,5 +66,22 @@ class AdminRepository {
         .from('profiles')
         .update({'balance': newBalance})
         .eq('id', userId);
+
+    // 3. Record transaction
+    final parentId = _supabase.auth.currentUser?.id;
+    if (parentId != null) {
+      try {
+        await _supabase.from('transactions').insert({
+          'id': const Uuid().v4(),
+          'sender_id': parentId,
+          'receiver_id': userId,
+          'amount': amount,
+          'note': 'Pocket Money / Added from Admin',
+          'created_at': DateTime.now().toUtc().toIso8601String(),
+        });
+      } catch (e) {
+        print("Could not log transaction: $e");
+      }
+    }
   }
 }
