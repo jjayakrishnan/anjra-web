@@ -46,6 +46,11 @@ class AuthRepository {
     );
   }
 
+  // Reset Password for Parent
+  Future<void> resetPassword(String email) async {
+    await _supabase.auth.resetPasswordForEmail(email);
+  }
+
   // Kid Sign In (Simplified: Using a "Quick Code" or QR which maps to email/pass strictly? 
   // OR actually implementing a custom auth flow?
   // For MVP, simplistic approach: Kids also have email/pass managed by parent?

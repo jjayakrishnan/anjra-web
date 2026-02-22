@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.use({ actionTimeout: 10000, navigationTimeout: 15000 });
+test.setTimeout(60000);
 
 test.describe('Anjra App Authentication & Dashboard Flows', () => {
 
@@ -74,8 +75,8 @@ test.describe('Anjra App Authentication & Dashboard Flows', () => {
   });
 
   test('Kid Login and View Transactions Web Test', async ({ page }) => {
-    // 1. Navigate to local Flutter Web server
-    await page.goto('http://localhost:8085');
+    // 1. Navigate to live Vercel Server
+    await page.goto('https://anjra.vercel.app');
     await page.waitForLoadState('load');
 
     // Wait for Flutter Web engine to initialize and mount the Canvas
@@ -86,7 +87,7 @@ test.describe('Anjra App Authentication & Dashboard Flows', () => {
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
-    await page.keyboard.type('lakshan', { delay: 100 });
+    await page.keyboard.type('jiya', { delay: 100 });
 
     // PIN field
     await page.keyboard.press('Tab');

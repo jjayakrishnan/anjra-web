@@ -94,8 +94,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     required bool isActive,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      focusColor: AppTheme.primaryColor.withOpacity(0.1),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),

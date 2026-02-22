@@ -104,6 +104,59 @@ class _ParentAuthPageState extends ConsumerState<ParentAuthPage> {
     );
   }
 
+  void _showForgotPasswordDialog() {
+    final emailController = TextEditingController(text: _emailController.text);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter your email to receive a password reset link.'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+              keyboardType: TextInputType.emailAddress,
+              autofocus: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final email = emailController.text.trim();
+              if (email.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter an email address')));
+                return;
+              }
+              Navigator.of(context).pop();
+              setState(() => _isLoading = true);
+              try {
+                await ref.read(authRepositoryProvider).resetPassword(email);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password reset link sent.')));
+                }
+              } catch (e) {
+                if (mounted) {
+                  _showErrorDialog('Reset failed', 'Could not send reset link.');
+                }
+              } finally {
+                if (mounted) setState(() => _isLoading = false);
+              }
+            },
+            child: const Text('Send Reset Link'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -143,6 +196,11 @@ class _ParentAuthPageState extends ConsumerState<ParentAuthPage> {
                     : Text(_isSignUp ? 'Sign Up' : 'Login'),
               ),
             ),
+            if (!_isSignUp)
+              TextButton(
+                onPressed: () => _showForgotPasswordDialog(),
+                child: const Text('Forgot Password?'),
+              ),
             TextButton(
               onPressed: () => setState(() => _isSignUp = !_isSignUp),
               child: Text(_isSignUp ? 'Already have an account? Login' : 'New here? Create Account'),
