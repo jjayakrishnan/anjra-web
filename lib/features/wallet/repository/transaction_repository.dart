@@ -18,6 +18,12 @@ class TransactionRepository {
     required double amount,
     String? note,
   }) async {
+    // Intercept Demo/Reviewer Account transfers to prevent Postgres foreign key crashes
+    if (senderId == '00000000-0000-0000-0000-000000000000') {
+      await Future.delayed(const Duration(seconds: 1)); // Simulate network request
+      return; // Return success without writing to database
+    }
+
     // Call a Postgres Function (RPC) for atomic transfer
     // OR do client-side if RPC isn't available (not recommended but feasible for prototype)
     
