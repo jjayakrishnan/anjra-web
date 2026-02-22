@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 import '../../../core/models/user_profile.dart';
 
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
@@ -93,14 +94,13 @@ class ProfileRepository {
     // I need Uuid package.
     
     await _supabase.from('profiles').insert({
+      'id': const Uuid().v4(),
       'full_name': name, // or custom fields
       'username': username,
       'pin': pin,
       'is_parent': false,
       'parent_id': parentId,
       'balance': 0.0,
-      // 'id': const Uuid().v4(), // If auto-gen or we must supply. Let DB handle text if gen_random_uuid() is default 
-      // But if id is PK, we might need to supply it if not auto-inc/uuid.
     });
   }
 }
