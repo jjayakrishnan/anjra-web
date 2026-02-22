@@ -8,7 +8,6 @@
     "test": "test"
   },
   "scripts": {
-    "prepare": "husky",
     "test:e2e": "playwright test"
   },
   "repository": {
