@@ -13,13 +13,27 @@ class AdminRepository {
   AdminRepository(this._supabase);
 
   Future<List<UserProfile>> fetchAllParents() async {
-    final response = await _supabase
-        .from('profiles')
-        .select()
-        .eq('is_parent', true)
-        .order('updated_at', ascending: false);
+    final currentUser = _supabase.auth.currentUser;
+    if (currentUser == null) return [];
 
-    return (response as List).map((e) => UserProfile.fromJson(e)).toList();
+    if (currentUser.email == 'evergreenjk@gmail.com') {
+      // Super Admin: View all parents
+      final response = await _supabase
+          .from('profiles')
+          .select()
+          .eq('is_parent', true)
+          .order('updated_at', ascending: false);
+      return (response as List).map((e) => UserProfile.fromJson(e)).toList();
+    } else {
+      // Regular Parent: Only view themselves
+      final response = await _supabase
+          .from('profiles')
+          .select()
+          .eq('is_parent', true)
+          .eq('id', currentUser.id)
+          .order('updated_at', ascending: false);
+      return (response as List).map((e) => UserProfile.fromJson(e)).toList();
+    }
   }
 
   Future<List<UserProfile>> fetchKidsForParent(String parentId) async {
