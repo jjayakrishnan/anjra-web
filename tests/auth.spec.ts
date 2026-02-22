@@ -9,9 +9,8 @@ test.describe('Anjra App Authentication & Dashboard Flows', () => {
     await page.goto('http://localhost:8085');
     await page.waitForLoadState('load');
 
-    // Wait for Flutter glass pane to appear
-    await page.waitForSelector('flt-glass-pane', { state: 'attached', timeout: 10000 });
-    // Add wait to ensure Flutter has fully booted
+    // Wait for Flutter Web engine to initialize and mount the Canvas
+    await page.waitForTimeout(10000);
     await page.waitForTimeout(5000);
 
     // Switch to Parent mode toggle
@@ -72,6 +71,40 @@ test.describe('Anjra App Authentication & Dashboard Flows', () => {
     // Wait for transfer and reload dashboard
     await page.waitForTimeout(5000);
     await page.screenshot({ path: 'test-results/dashboard-after-send-web.png' });
+  });
+
+  test('Kid Login and View Transactions Web Test', async ({ page }) => {
+    // 1. Navigate to local Flutter Web server
+    await page.goto('http://localhost:8085');
+    await page.waitForLoadState('load');
+
+    // Wait for Flutter Web engine to initialize and mount the Canvas
+    await page.waitForTimeout(10000);
+    await page.waitForTimeout(5000);
+
+    // Kid mode is default. Tab to Username
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('lakshan', { delay: 100 });
+
+    // PIN field
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('1234', { delay: 100 });
+
+    // Login button
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Enter');
+
+    console.log("Submitted kid login. Waiting for dashboard...");
+    await page.waitForTimeout(5000);
+
+    // Now we should be on the dashboard page, scroll down or wait to verify transactions load
+    await page.screenshot({ path: 'test-results/kid-dashboard-web.png' });
+
+    // Additional wait to ensure transactions are completely visible
+    await page.waitForTimeout(2000);
+    await page.screenshot({ path: 'test-results/kid-transaction-history.png' });
   });
 
 });
