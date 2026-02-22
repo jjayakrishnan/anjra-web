@@ -121,7 +121,7 @@ class _SendMoneyPageState extends ConsumerState<SendMoneyPage> {
         senderId: currentUser.id,
         receiverId: matchedUser.id,
         amount: amount,
-        note: note.isNotEmpty ? note : 'Sent by Username',
+        note: note.isNotEmpty ? note : 'Money Transfer',
       );
 
       await ref.read(userProvider.notifier).refreshProfile();
