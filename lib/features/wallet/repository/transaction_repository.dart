@@ -84,7 +84,7 @@ class TransactionRepository {
       // For kids, they are unauthenticated (anon) after login, so RLS blocks them from reading transactions.
       // We use a custom Postgres RPC `get_user_transactions` which runs as SECURITY DEFINER to bypass RLS.
       final response = await _supabase.rpc(
-        'get_user_transactions',
+        'get_kid_transactions',
         params: {'user_uid': userId},
       );
       
