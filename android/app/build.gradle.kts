@@ -11,7 +11,7 @@ plugins {
 android {
     namespace = "com.jjayakrishnan.anjra"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "28.2.13676358"
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -20,6 +20,12 @@ android {
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
+    }
+
+    packaging {
+        jniLibs {
+            keepDebugSymbols += setOf("**/*.so")
+        }
     }
 
     defaultConfig {

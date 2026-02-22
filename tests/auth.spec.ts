@@ -20,7 +20,7 @@ test.describe('Anjra App Authentication & Dashboard Flows', () => {
     const passInput = page.locator('input[type="password"]').first();
 
     // In our app, there might not be explicit input types. We'll wait for the canvas to load.
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // This is an example workflow for a true semantic web build:
     /*
