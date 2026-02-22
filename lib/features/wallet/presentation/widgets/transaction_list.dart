@@ -28,8 +28,10 @@ class TransactionList extends ConsumerWidget {
         // Ideally parse to Transaction model safely
         final transactions = transactionsRaw.map((e) {
              try {
-               return Transaction.fromJson(e);
-             } catch (_) {
+               return Transaction.fromJson(Map<String, dynamic>.from(e));
+             } catch (err) {
+               print('Failed to parse transaction: $err');
+               print('Raw transaction data: $e');
                return null;
              }
         }).whereType<Transaction>().toList();

@@ -78,14 +78,26 @@ class _ParentAuthPageState extends ConsumerState<ParentAuthPage> {
       } else {
         await repo.signInParent(email: email, password: password);
         if (mounted) {
-           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Welcome back!')));
-           Navigator.of(context).pushReplacementNamed('/dashboard');
+           await ref.read(userProvider.notifier).refreshProfile();
+           if (mounted) {
+             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Welcome back!')));
+             Navigator.of(context).pushReplacementNamed('/dashboard');
+           }
+        }
+      }
+    } on AuthException catch (e) {
+      if (mounted) {
+        if (e.message.contains('Email not confirmed')) {
+          _showErrorDialog('Email Not Confirmed', 'Please check your email and click the confirmation link to activate your account. If you just created the account, you may need to ask the app owner to disable email confirmation in the database.');
+        } else if (e.message.contains('Invalid login credentials')) {
+          _showErrorDialog('Login Failed', 'The email or password you entered is incorrect. Please try again.');
+        } else {
+          _showErrorDialog('Authentication Failed', e.message);
         }
       }
     } catch (e) {
       if (mounted) {
-        // Show clear dialog for errors (better for iPad)
-        _showErrorDialog('Authentication Failed', e.toString());
+        _showErrorDialog('Authentication Failed', 'An unexpected error occurred. Please try again.');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

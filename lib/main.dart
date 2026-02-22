@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/supabase_constants.dart';
 import 'features/auth/presentation/login_page.dart';
+import 'features/auth/presentation/auth_gate.dart';
 import 'features/wallet/presentation/dashboard_page.dart';
 import 'features/admin/presentation/admin_dashboard_page.dart';
 
@@ -37,11 +38,23 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       // Simple routing
-      initialRoute: '/login',
+      initialRoute: '/',
       routes: {
+        '/': (context) => const AuthGate(),
         '/login': (context) => const LoginPage(),
         '/dashboard': (context) => const DashboardPage(),
         '/admin': (context) => const AdminDashboardPage(),
+      },
+      builder: (context, child) {
+        return Container(
+          color: Colors.grey[100], // subtle background for the unused wide space
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: ClipRect(child: child),
+            ),
+          ),
+        );
       },
       // home: const LoginPage(), // Handled by initialRoute
     );

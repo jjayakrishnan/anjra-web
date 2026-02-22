@@ -8,6 +8,7 @@ import '../../scan/presentation/scan_page.dart';
 import 'receive_page.dart';
 import '../../auth/presentation/add_kid_page.dart';
 import 'widgets/transaction_list.dart';
+import 'send_money_page.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -105,7 +106,32 @@ class DashboardPage extends ConsumerWidget {
                        Expanded(
                          child: ElevatedButton.icon(
                            onPressed: () {
-                             Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanPage()));
+                             showModalBottomSheet(
+                               context: context,
+                               builder: (context) => SafeArea(
+                                 child: Column(
+                                   mainAxisSize: MainAxisSize.min,
+                                   children: [
+                                     ListTile(
+                                       leading: const Icon(Icons.qr_code_scanner),
+                                       title: const Text('Scan QR Code'),
+                                       onTap: () {
+                                         Navigator.pop(context);
+                                         Navigator.push(context, MaterialPageRoute(builder: (_) => const ScanPage()));
+                                       },
+                                     ),
+                                     ListTile(
+                                       leading: const Icon(Icons.person_search),
+                                       title: const Text('Send to Username'),
+                                       onTap: () {
+                                         Navigator.pop(context);
+                                         Navigator.push(context, MaterialPageRoute(builder: (_) => const SendMoneyPage()));
+                                       },
+                                     ),
+                                   ],
+                                 ),
+                               ),
+                             );
                            },
                            icon: const Icon(Icons.send),
                            label: const Text("Send"),
